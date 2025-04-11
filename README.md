@@ -11,6 +11,7 @@ nullyrics connects with your spotify account to show the lyrics of your current 
 - dynamic backgrounds generated from the album cover if no custom css is found
 - zoom controls for adjusting text size and spacing
 - a simple login process via oauth with pkce
+- free to fork and add features i wouldn't cause of my laziness
 
 ## folder structure
 
@@ -45,9 +46,9 @@ project-root/
    git clone https://github.com/yourusername/nullyrics.git
    cd nullyrics
    ```
-
+    or go to the top of this page and press "Code" then "Download ZIP"
 2. **run the local server**
-
+    *(make sure you have python)*
    - on windows: double-click the `launch.bat` file.
    - alternatively, in a terminal run:
    
@@ -74,14 +75,21 @@ project-root/
    - click the **login with spotify** button and follow the prompts to authorize the app.
    - the login process is quick and typically only requires a couple of clicks.
    - enjoy your live wallpaper displaying your spotify lyrics.
+5. **common weird bug fixes**
+
+    - if the lyrics go out of sync, go back 1-2 seconds with the song you're listening to.
+    - if custom css wont load and you had the wallpaper open while adding it, close (terminate terminal or better, crtl+c) and open your local server (bat file)
 
 ## customization
 
 - **custom css themes:**  
-  when a new track plays, the app logs the expected custom css folder names (using a sanitized version of the artist, album, and track names). use these names for your subfolders under `styles/artist`, `styles/album`, and `styles/single` to apply your custom css.
+  when a new track plays, the app logs the expected custom css folder names (using a sanitized version of the artist, album, and track names). use these names for your subfolders under `styles/artist`, `styles/album`, and `styles/single`, and place style.css files and any additional files (fonts, backgrounds) in these subfolders to apply your custom css.
 
 - **debug panel:**  
   the debug panel is hidden by default; press the **d** key to toggle it and see logs, including the expected folder names for your custom css.
+
+- **settings button**   
+in the bottom right, theres a settings utton that lets you zoom in, zoom out, and recenter (only useful if opening localhost on a web browser)
 
 ## screenshots
 
