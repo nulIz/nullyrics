@@ -5,160 +5,157 @@
     <title>nullyrics</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Color Thief library for color extraction from album art -->
+    <!-- color thief for extracting album art colors -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js" integrity="sha512-tK1VOkYJ81...==" crossorigin="anonymous"></script>
 
-    <!-- Default / Fallback CSS (can be moved to styles/default.css) -->
     <style>
-            /* -----------------------------
-           GLOBAL / DEFAULT STYLES
-        ----------------------------- */
-            html, body {
-                margin: 0;
-                padding: 0;
-                width: 100%;
-                height: 100%;
-                overflow: hidden;
-                background: #000; /* Fallback background (overridden by custom CSS or gradient) */
-                color: #fff;
-                font-family: sans-serif;
-                text-align: center;
-            }
-            /* Lyrics Container */
-            #lyrics-container {
-                width: 100vw;
-                height: 100vh;
-                overflow-y: scroll;
-                -ms-overflow-style: none;
-                scrollbar-width: none;
-            }
+        /* global default styles */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000; /* fallback bg */
+            color: #fff;
+            font-family: sans-serif;
+            text-align: center;
+        }
+        /* lyrics container styles */
+        #lyrics-container {
+            width: 100vw;
+            height: 100vh;
+            overflow-y: scroll;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
 
-                #lyrics-container::-webkit-scrollbar {
-                    display: none;
-                }
-            /* Inner container for lyrics; zoom is applied here */
-            #lyrics-inner {
-                padding: 40px 0;
-                font-size: 100%;
-            }
-            /* Lyric lines */
-            .lyric-line {
-                margin: 24px 0; /* Default spacing (will be capped on zoom out) */
-                font-size: 1.8em;
-                transition: font-size 0.3s, margin 0.3s, opacity 0.3s;
-            }
-            /* Past/Future lyric appearance */
-            .past-lyric,
-            .future-lyric {
-                font-size: 1.5em;
-                opacity: 0.6;
-            }
-            /* Current lyric */
-            .current-lyric {
-                font-size: 3.5em;
-                opacity: 1;
-                font-weight: bold;
-            }
-            /* Debug Panel – default closed */
-            #debug {
+            #lyrics-container::-webkit-scrollbar {
                 display: none;
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                background: rgba(0, 0, 0, 0.8);
-                color: #fff;
-                font-family: monospace;
-                font-size: 12px;
-                width: 100%;
-                max-height: 200px;
-                overflow-y: auto;
-                padding: 5px;
-                box-sizing: border-box;
-                z-index: 9999;
             }
-            /* Login Button */
-            #login {
-                position: absolute;
-                top: 10%;
-                left: 50%;
-                transform: translateX(-50%);
-                font-size: 1.2em;
-                padding: 10px 20px;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-                background: #1DB954;
-                color: #fff;
-                z-index: 10000;
-            }
-            /* Zoom & Style Menu (mini drop-down in bottom-right) */
-            #menu {
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                background: rgba(0, 0, 0, 0.3);
-                backdrop-filter: blur(10px);
-                -webkit-backdrop-filter: blur(10px);
-                border-radius: 8px;
-                padding: 5px 10px;
-                z-index: 10000;
-                transition: all 0.3s ease;
-                color: #fff;
-                font-family: sans-serif;
-            }
-            /* Gear icon for toggling the menu */
-            #menu-toggle {
-                cursor: pointer;
-                font-size: 1.2rem;
-                padding: 4px 6px;
-                user-select: none;
-            }
-            /* Menu items container (hidden by default) */
-            #menu-items {
-                display: none;
-                margin-top: 4px;
-                text-align: left;
+        /* inner container; zoom gets applied here */
+        #lyrics-inner {
+            padding: 40px 0;
+            font-size: 100%;
+        }
+        /* individual lyric line style */
+        .lyric-line {
+            margin: 24px 0; /* default spacing (capped on zoom out) */
+            font-size: 1.8em;
+            transition: font-size 0.3s, margin 0.3s, opacity 0.3s;
+        }
+        /* past/future lyric styles */
+        .past-lyric,
+        .future-lyric {
+            font-size: 1.5em;
+            opacity: 0.6;
+        }
+        /* current lyric style */
+        .current-lyric {
+            font-size: 3.5em;
+            opacity: 1;
+            font-weight: bold;
+        }
+        /* debug panel - hidden by default */
+        #debug {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            background: rgba(0,0,0,0.8);
+            color: #fff;
+            font-family: monospace;
+            font-size: 12px;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 5px;
+            box-sizing: border-box;
+            z-index: 9999;
+        }
+        /* login button style */
+        #login {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.2em;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #1DB954;
+            color: #fff;
+            z-index: 10000;
+        }
+        /* zoom & style menu */
+        #menu {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 8px;
+            padding: 5px 10px;
+            z-index: 10000;
+            transition: all 0.3s ease;
+            color: #fff;
+            font-family: sans-serif;
+        }
+        /* gear icon for menu toggle */
+        #menu-toggle {
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 4px 6px;
+            user-select: none;
+        }
+        /* menu items container, hidden by default */
+        #menu-items {
+            display: none;
+            margin-top: 4px;
+            text-align: left;
+        }
+
+        #menu.open #menu-items {
+            display: block;
+        }
+        /* buttons in menu */
+        #menu-items button {
+            display: block;
+            width: 100%;
+            background: transparent;
+            color: #fff;
+            border: none;
+            text-align: left;
+            padding: 6px 8px;
+            margin: 2px 0;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+            #menu-items button:hover {
+                background: rgba(255,255,255,0.2);
             }
 
-            #menu.open #menu-items {
-                display: block;
+            #menu-items button:active {
+                transform: scale(0.98);
             }
-            /* Buttons inside the drop-down */
-            #menu-items button {
-                display: block;
-                width: 100%;
-                background: transparent;
-                color: #fff;
-                border: none;
-                text-align: left;
-                padding: 6px 8px;
-                margin: 2px 0;
-                font-size: 0.9rem;
-                cursor: pointer;
-                border-radius: 4px;
-                transition: background 0.2s, transform 0.1s;
-            }
-
-                #menu-items button:hover {
-                    background: rgba(255, 255, 255, 0.2);
-                }
-
-                #menu-items button:active {
-                    transform: scale(0.98);
-                }
     </style>
 </head>
 <body>
-    <!-- Lyrics Container -->
+    <!-- lyrics container -->
     <div id="lyrics-container">
         <div id="lyrics-inner">
-            <!-- Lyric lines get injected dynamically -->
+            <!-- lyric lines injected dynamically -->
         </div>
     </div>
 
-    <!-- Mini Drop-down Menu (Zoom, Recenter) -->
+    <!-- zoom & style menu -->
     <div id="menu">
-        <div id="menu-toggle" title="Settings">&#9881;</div>
+        <div id="menu-toggle" title="settings">&#9881;</div>
         <div id="menu-items">
             <button id="zoom-in">zoom in</button>
             <button id="zoom-out">zoom out</button>
@@ -166,25 +163,40 @@
         </div>
     </div>
 
-    <!-- Debug Panel -->
+    <!-- debug panel -->
     <div id="debug"></div>
-    <!-- Login Button -->
-    <button id="login" style="display:none;">Login with Spotify</button>
+    <!-- login button -->
+    <button id="login" style="display:none;">login with spotify</button>
 
     <script>
-        /* ===============================
-           Debug Utility (toggle with "D")
-        =============================== */
+        // global variable to control auto scroll
+        var debugAutoScroll = true;
+
+        // attach scroll listener to the debug panel
+        const debugDiv = document.getElementById("debug");
+        debugDiv.addEventListener('scroll', function () {
+            // if not scrolled to the bottom, disable auto scroll
+            if (this.scrollTop + this.clientHeight < this.scrollHeight - 5) {
+                debugAutoScroll = false;
+            } else {
+                debugAutoScroll = true;
+            }
+        });
+
         function debugLog(msg) {
             const debugDiv = document.getElementById("debug");
-            const atBottom = debugDiv.scrollTop + debugDiv.clientHeight >= debugDiv.scrollHeight - 5;
             const timeStamp = new Date().toLocaleTimeString();
             const newMsg = document.createElement("div");
             newMsg.textContent = "[" + timeStamp + "] " + msg;
             debugDiv.appendChild(newMsg);
-            if (atBottom) { debugDiv.scrollTop = debugDiv.scrollHeight; }
+
+            // if auto scroll is enabled, always scroll to the bottom
+            if (debugAutoScroll) {
+                debugDiv.scrollTop = debugDiv.scrollHeight;
+            }
             console.log(msg);
         }
+
         document.addEventListener("keydown", (e) => {
             if (e.key.toLowerCase() === "d") {
                 const debugDiv = document.getElementById("debug");
@@ -192,16 +204,14 @@
             }
         });
 
-        /* ===============================
-           Spotify OAuth (PKCE)
-        =============================== */
-        const CLIENT_ID = "07a6b2d0d9374aac9ab9528fc0f05fd3"; // Replace with your Spotify client ID
+        // spotify oauth setup (pkce)
+        const CLIENT_ID = "07a6b2d0d9374aac9ab9528fc0f05fd3"; // replace with your spotify client id
         const REDIRECT_URI = window.location.origin + window.location.pathname;
         const SCOPES = "user-read-currently-playing user-read-playback-state";
-        const musixmatchApiKey = ""; // Insert your Musixmatch API key if desired
+        const musixmatchApiKey = ""; // if needed
 
         function generateRandomString(length) {
-            const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+            const possible = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~";
             let text = "";
             const array = new Uint8Array(length);
             window.crypto.getRandomValues(array);
@@ -230,13 +240,13 @@
             const expiresAt = Date.now() + expiresIn * 1000;
             localStorage.setItem("spotify_access_token", token);
             localStorage.setItem("spotify_token_expires_at", expiresAt);
-            debugLog("Token stored; expires at " + new Date(expiresAt).toLocaleTimeString());
+            debugLog("token stored; expires at " + new Date(expiresAt).toLocaleTimeString());
         }
         function getStoredToken() {
             const token = localStorage.getItem("spotify_access_token");
             const expiresAt = localStorage.getItem("spotify_token_expires_at");
             if (token && expiresAt && Date.now() < parseInt(expiresAt, 10)) {
-                debugLog("Using stored token from localStorage.");
+                debugLog("using stored token");
                 return token;
             }
             return null;
@@ -252,12 +262,12 @@
                 "&redirect_uri=" + encodeURIComponent(REDIRECT_URI) +
                 "&code_challenge_method=S256" +
                 "&code_challenge=" + encodeURIComponent(codeChallenge);
-            debugLog("Redirecting to Spotify auth...");
+            debugLog("redirecting to spotify auth...");
             window.location = authUrl;
         }
         async function exchangeCodeForToken(code) {
             const codeVerifier = localStorage.getItem("spotify_code_verifier");
-            debugLog("Exchanging code for token...");
+            debugLog("exchanging code for token...");
             const body = new URLSearchParams({
                 grant_type: "authorization_code",
                 code: code,
@@ -276,29 +286,24 @@
                     storeToken(data.access_token, data.expires_in);
                     return data.access_token;
                 } else {
-                    debugLog("Error exchanging code: " + JSON.stringify(data));
+                    debugLog("error exchanging code: " + JSON.stringify(data));
                     return null;
                 }
             } catch (err) {
-                debugLog("Token exchange error: " + err);
+                debugLog("token exchange error: " + err);
                 return null;
             }
         }
 
-        /* ===============================
-           Custom Styles & Dynamic Gradient
-        =============================== */
-        // Sanitize strings for file/directory names (e.g., converting "AC/DC" to "ac-dc")
+        // custom styles & dynamic gradient
+        // sanitize string for folder names (all lowercase, hyphens)
         function sanitizeName(name) {
             return name.toLowerCase()
                 .replace(/[^a-z0-9]+/g, "-")
                 .replace(/^-+|-+$/g, "");
         }
-        // Load custom CSS files from subfolders.
-        // For each type (artist, album, single), check for a subfolder named with
-        // the sanitized name and load its "style.css". Additionally, log the expected folder names.
+        // load custom css from subfolders; log expected folder names
         function applyCustomStyles(trackName, albumName, artistName, albumCoverUrl) {
-            // Clear previous body classes and background
             document.body.className = "";
             document.body.style.backgroundImage = "none";
             const head = document.getElementsByTagName("head")[0];
@@ -307,14 +312,13 @@
             let albumLoaded = false;
             let artistLoaded = false;
 
-            // Log the expected folder names for development help.
             const expectedArtistFolder = sanitizeName(artistName);
             const expectedAlbumFolder = sanitizeName(albumName);
             const expectedSingleFolder = sanitizeName(trackName);
 
-            debugLog("Expected custom CSS folder for ARTIST: " + expectedArtistFolder);
-            debugLog("Expected custom CSS folder for ALBUM: " + expectedAlbumFolder);
-            debugLog("Expected custom CSS folder for SINGLE: " + expectedSingleFolder);
+            debugLog("expected artist folder: " + expectedArtistFolder);
+            debugLog("expected album folder: " + expectedAlbumFolder);
+            debugLog("expected single folder: " + expectedSingleFolder);
 
             function loadStyle(href, id, callback) {
                 const link = document.createElement("link");
@@ -331,26 +335,23 @@
                 head.appendChild(link);
             }
 
-            // Look in the subfolders for each type
             loadStyle("styles/artist/" + expectedArtistFolder + "/style.css", "artist-style", () => {
                 artistLoaded = true;
-                debugLog("Loaded custom CSS for ARTIST from folder: " + expectedArtistFolder);
+                debugLog("loaded custom css for artist from folder: " + expectedArtistFolder);
             });
             loadStyle("styles/album/" + expectedAlbumFolder + "/style.css", "album-style", () => {
                 albumLoaded = true;
-                debugLog("Loaded custom CSS for ALBUM from folder: " + expectedAlbumFolder);
+                debugLog("loaded custom css for album from folder: " + expectedAlbumFolder);
             });
             loadStyle("styles/single/" + expectedSingleFolder + "/style.css", "single-style", () => {
                 singleLoaded = true;
-                debugLog("Loaded custom CSS for SINGLE from folder: " + expectedSingleFolder);
+                debugLog("loaded custom css for single from folder: " + expectedSingleFolder);
             });
 
-            // After a short delay, if no custom CSS is loaded, apply the album cover gradient.
             setTimeout(() => {
                 if (!customStyleLoaded && albumCoverUrl) {
                     applyAlbumCoverGradient(albumCoverUrl);
                 } else {
-                    // Optionally assign a body class based on available custom CSS: single > album > artist.
                     if (singleLoaded) {
                         document.body.classList.add(expectedSingleFolder + "-single");
                     } else if (albumLoaded) {
@@ -361,7 +362,7 @@
                 }
             }, 600);
         }
-        // Apply a dynamic background gradient from the album cover using Color Thief.
+        // apply gradient from album cover using color thief
         function applyAlbumCoverGradient(imageUrl) {
             const img = new Image();
             img.crossOrigin = "anonymous";
@@ -376,15 +377,13 @@
                     const gradientCSS = `linear-gradient(135deg, ${rgbA}, ${rgbB})`;
                     document.body.style.backgroundImage = gradientCSS;
                 } catch (e) {
-                    debugLog("Gradient generation failed: " + e);
+                    debugLog("gradient generation failed: " + e);
                 }
             };
             img.src = imageUrl;
         }
 
-        /* ===============================
-           Lyric Sync & Display Logic
-        =============================== */
+        // lyric sync & display logic
         let spotifyToken = null;
         let currentTrackId = null;
         let currentSongPosition = 0;
@@ -399,12 +398,11 @@
         const lyricsContainer = document.getElementById("lyrics-container");
         const lyricsInner = document.getElementById("lyrics-inner");
 
-        // Zoom level (persisted via localStorage)
+        // zoom level from localstorage (default 1)
         let zoomLevel = parseFloat(localStorage.getItem("zoomLevel")) || 1.0;
         lyricsInner.style.fontSize = (zoomLevel * 100) + "%";
 
-        // Update margins of lyric elements.
-        // When zoomed out (zoomLevel < 1), cap margins to the default (24px).
+        // update margins for lyric elements; if zoomed out (<1), keep margin at default (24px)
         function updateLyricMargins() {
             const effectiveZoom = zoomLevel < 1 ? 1 : zoomLevel;
             const newMargin = 24 * effectiveZoom;
@@ -414,7 +412,7 @@
             });
         }
 
-        // Update display (active lyric highlight and auto-centering)
+        // update display: set active lyric and auto-center it
         function updateLyricDisplay(songPosMs) {
             if (!lyrics.length) return;
             let idx = 0;
@@ -436,15 +434,11 @@
                     elem.classList.add("future-lyric");
                 }
             });
-            // Auto-center the current lyric.
+            // auto-center current lyric without margins
             const currentElem = lyricElements[currentLyricIndex];
             if (currentElem && autoCenterEnabled) {
                 const containerHeight = lyricsContainer.clientHeight;
-                const computedStyle = window.getComputedStyle(currentElem);
-                const marginTop = parseFloat(computedStyle.marginTop) || 0;
-                const marginBottom = parseFloat(computedStyle.marginBottom) || 0;
-                const effectiveHeight = currentElem.clientHeight + marginTop + marginBottom;
-                const offset = (currentElem.offsetTop + effectiveHeight / 2) - (containerHeight / 2);
+                const offset = currentElem.offsetTop + (currentElem.clientHeight / 2) - (containerHeight / 2);
                 if (currentLyricIndex !== lastCenteredLyricIndex) {
                     lastCenteredLyricIndex = currentLyricIndex;
                     lyricsContainer.scrollTo({ top: offset, behavior: "smooth" });
@@ -460,29 +454,27 @@
             animationFrameRequest = requestAnimationFrame(animationLoop);
         }
 
-        /* ===============================
-           Spotify Polling & Lyrics Fetching
-        =============================== */
+        // spotify polling & lyrics fetching
         async function fetchCurrentTrack() {
-            debugLog("Fetching current track from Spotify...");
+            debugLog("fetching current track from spotify...");
             try {
                 const resp = await fetch("https://api.spotify.com/v1/me/player/currently-playing", {
                     headers: { "Authorization": "Bearer " + spotifyToken }
                 });
                 if (resp.status === 204) {
-                    debugLog("No track currently playing (204).");
+                    debugLog("no track playing (204).");
                     return null;
                 }
                 const data = await resp.json();
-                debugLog("Fetched track: " + (data.item ? data.item.name : "none"));
+                debugLog("fetched track: " + (data.item ? data.item.name : "none"));
                 return data;
             } catch (err) {
-                debugLog("Spotify API error: " + err);
+                debugLog("spotify api error: " + err);
                 return null;
             }
         }
         async function pollSpotify() {
-            debugLog("Polling Spotify...");
+            debugLog("polling spotify...");
             const data = await fetchCurrentTrack();
             if (data && data.item) {
                 const trackId = data.item.id;
@@ -494,20 +486,18 @@
                 const progressMs = data.progress_ms || 0;
                 trackPaused = !data.is_playing;
 
-                // Only update custom styles when a new track is detected.
+                // update custom styles only on new track
                 if (trackId !== currentTrackId) {
-                    debugLog("New track detected: " + trackName);
+                    debugLog("new track detected: " + trackName);
                     currentTrackId = trackId;
 
-                    // Log expected folder names for custom CSS.
                     const expectedArtistFolder = sanitizeName(artistName);
                     const expectedAlbumFolder = sanitizeName(albumName);
                     const expectedSingleFolder = sanitizeName(trackName);
-                    debugLog("Expected custom CSS folder for ARTIST: " + expectedArtistFolder);
-                    debugLog("Expected custom CSS folder for ALBUM: " + expectedAlbumFolder);
-                    debugLog("Expected custom CSS folder for SINGLE: " + expectedSingleFolder);
+                    debugLog("expected css folder for artist: " + expectedArtistFolder);
+                    debugLog("expected css folder for album: " + expectedAlbumFolder);
+                    debugLog("expected css folder for single: " + expectedSingleFolder);
 
-                    // Apply custom styles (from subfolders) or fallback to gradient.
                     applyCustomStyles(trackName, albumName, artistName, albumCoverUrl);
 
                     currentLyricIndex = 0;
@@ -516,9 +506,9 @@
                     lyricsInner.innerHTML = "";
                     const lyricData = await fetchLyrics(trackName, artistName, albumName, durationMs);
                     if (!lyricData) {
-                        lyricsInner.innerHTML = `<div class="errorMsg">Lyrics not found for "${trackName}"</div>`;
+                        lyricsInner.innerHTML = `<div class="errorMsg">lyrics not found for "${trackName}"</div>`;
                     } else if (!lyricData.isSynced) {
-                        lyricsInner.innerHTML = `<div class="errorMsg">No synced lyrics available for "${trackName}"</div>`;
+                        lyricsInner.innerHTML = `<div class="errorMsg">no synced lyrics for "${trackName}"</div>`;
                     } else {
                         lyrics = parseSyncedLyrics(lyricData.lyrics);
                         buildLyricElements(lyrics);
@@ -534,45 +524,45 @@
                     lastSpotifyTimestamp = performance.now();
                 }
             } else {
-                debugLog("No track data or not playing.");
+                debugLog("no track data or not playing.");
             }
             setTimeout(pollSpotify, POLL_INTERVAL);
         }
         async function fetchLyrics(track, artist, album, durationMs) {
-            debugLog(`Fetching lyrics for "${track}" by "${artist}"...`);
+            debugLog(`fetching lyrics for "${track}" by "${artist}"...`);
             const durationSec = Math.floor(durationMs / 1000);
             const lyricsApiBase = "https://lrclib.net/api/get";
             const url = `${lyricsApiBase}?track_name=${encodeURIComponent(track)}&artist_name=${encodeURIComponent(artist)}&album_name=${encodeURIComponent(album)}&duration=${durationSec}`;
-            debugLog("Request URL: " + url);
+            debugLog("request url: " + url);
             try {
                 const resp = await fetch(url);
                 const data = await resp.json();
                 if (data && data.syncedLyrics) {
-                    debugLog("Synced lyrics found from LRCLIB.");
+                    debugLog("synced lyrics found from lrclib.");
                     return { lyrics: data.syncedLyrics, isSynced: true };
                 } else if (data && data.plainLyrics) {
-                    debugLog("Plain lyrics found (not synced) from LRCLIB.");
+                    debugLog("plain lyrics found (not synced) from lrclib.");
                     return { lyrics: data.plainLyrics, isSynced: false };
                 }
             } catch (err) {
-                debugLog("LRCLIB fetch failed: " + err);
+                debugLog("lrclib fetch failed: " + err);
             }
             if (musixmatchApiKey) {
                 try {
                     const mmUrl = `https://api.musixmatch.com/ws/1.1/matcher.subtitle.get?format=json&q_track=${encodeURIComponent(track)}&q_artist=${encodeURIComponent(artist)}&${musixmatchApiKey}&f_subtitle_length=${durationSec}`;
-                    debugLog("Attempting Musixmatch fallback: " + mmUrl);
+                    debugLog("attempting musixmatch fallback: " + mmUrl);
                     const resp = await fetch(mmUrl);
                     const data = await resp.json();
                     const body = data.message?.body;
                     if (body && body.subtitle && body.subtitle.subtitle_body) {
-                        debugLog("Synced lyrics found from Musixmatch.");
+                        debugLog("synced lyrics found from musixmatch.");
                         return { lyrics: body.subtitle.subtitle_body, isSynced: true };
                     }
                 } catch (err) {
-                    debugLog("Musixmatch API error: " + err);
+                    debugLog("musixmatch api error: " + err);
                 }
             }
-            debugLog("No lyrics found.");
+            debugLog("no lyrics found.");
             return null;
         }
         function timeStrToMs(timeStr) {
@@ -592,7 +582,7 @@
             return (min * 60 + sec) * 1000 + (ms < 10 ? ms * 100 : (ms < 100 ? ms * 10 : ms));
         }
         function parseSyncedLyrics(lrcText) {
-            debugLog("Parsing synced lyrics...");
+            debugLog("parsing synced lyrics...");
             const events = [];
             const lines = lrcText.split(/\r?\n/);
             for (let line of lines) {
@@ -611,7 +601,7 @@
                 }
             }
             events.sort((a, b) => a.time - b.time);
-            debugLog("Parsed " + events.length + " lyric events.");
+            debugLog("parsed " + events.length + " lyric events.");
             return events;
         }
         function buildLyricElements(lyricsArray) {
@@ -626,27 +616,23 @@
             });
         }
 
-        /* ===============================
-           Auto-Centering Toggle
-        =============================== */
+        // auto-center toggle
         let autoCenterEnabled = true;
         let lastCenteredLyricIndex = -1;
         lyricsContainer.addEventListener("wheel", () => {
             if (autoCenterEnabled) {
                 autoCenterEnabled = false;
-                debugLog("User scrolled manually; auto-centering disabled.");
+                debugLog("user scrolled; auto-centering off.");
             }
         });
         lyricsContainer.addEventListener("touchmove", () => {
             if (autoCenterEnabled) {
                 autoCenterEnabled = false;
-                debugLog("User touched/scrolled; auto-centering disabled.");
+                debugLog("user touched; auto-centering off.");
             }
         });
 
-        /* ===============================
-           Zoom & Recenter Controls
-        =============================== */
+        // zoom & recenter controls
         const menu = document.getElementById("menu");
         const menuToggle = document.getElementById("menu-toggle");
         menuToggle.addEventListener("click", () => {
@@ -659,7 +645,7 @@
             updateLyricMargins();
         });
         document.getElementById("zoom-out").addEventListener("click", () => {
-            // Allow zooming out beyond default, but cap spacing to default.
+            // allow zooming out further, but cap margin spacing to default
             zoomLevel = zoomLevel - 0.1;
             lyricsInner.style.fontSize = (zoomLevel * 100) + "%";
             localStorage.setItem("zoomLevel", zoomLevel.toFixed(2));
@@ -669,17 +655,15 @@
             const currentLine = document.querySelector(".current-lyric");
             if (currentLine) {
                 currentLine.scrollIntoView({ behavior: "smooth", block: "center" });
-                debugLog("Recentered to current lyric.");
+                debugLog("recentered to current lyric.");
             }
         });
 
-        /* ===============================
-           Initialization & Spotify Polling
-        =============================== */
+        // init & spotify polling
         async function init() {
             spotifyToken = getStoredToken();
             if (spotifyToken) {
-                debugLog("Found stored token, starting app.");
+                debugLog("found stored token, starting app.");
                 pollSpotify();
                 animationFrameRequest = requestAnimationFrame(animationLoop);
             } else {
@@ -691,12 +675,12 @@
                         pollSpotify();
                         animationFrameRequest = requestAnimationFrame(animationLoop);
                     } else {
-                        debugLog("Failed to obtain token.");
+                        debugLog("failed to obtain token.");
                     }
                 } else {
                     document.getElementById("login").style.display = "block";
                     document.getElementById("login").onclick = initiateSpotifyAuth;
-                    debugLog("No token found. Waiting for user login...");
+                    debugLog("no token found, waiting for login.");
                 }
             }
         }

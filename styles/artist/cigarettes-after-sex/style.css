@@ -1,0 +1,37 @@
+@font-face {
+    font-family: "Melancholy Serif";
+    src: url("ITC.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* set a dark, moody background with a subtle gradient */
+body.cigarettes-after-sex-artist {
+    background: linear-gradient(135deg, #2c2c2c, #121212);
+    color: #e0e0e0;
+    font-family: "Melancholy Serif", Georgia, serif;
+    margin: 0;
+    padding: 0;
+}
+
+    /* base style for all lyric lines */
+    body.cigarettes-after-sex-artist .lyric-line {
+        font-size: 2em;
+        line-height: 1.5;
+        letter-spacing: 0.5px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+        transition: all 0.3s ease;
+    }
+
+    /* styling for non-active lyric lines */
+    body.cigarettes-after-sex-artist .past-lyric,
+    body.cigarettes-after-sex-artist .future-lyric {
+        opacity: 0.6;
+    }
+
+    /* styling for the active lyric line */
+    body.cigarettes-after-sex-artist .current-lyric {
+        font-weight: bold;
+        opacity: 1;
+        font-size: 3em;
+    }
