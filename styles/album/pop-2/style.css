@@ -1,0 +1,36 @@
+@font-face {
+    font-family: "Arial Narrow";
+    src: url("ArialNarrow.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Set the entire background and base text for the album "pop 2" */
+body.pop-2-album {
+    background-color: #c9a1dd !important;
+    color: #000000 !important;
+}
+
+    /* Base styling for all lyric lines */
+    body.pop-2-album .lyric-line {
+        font-family: "Arial Narrow", Arial, sans-serif !important;
+        transform: scaleX(0.85);
+        color: #000000 !important;
+        filter: blur(1px);
+    }
+
+    /* Styling for non-active (past and future) lyrics */
+    body.pop-2-album .past-lyric,
+    body.pop-2-album .future-lyric {
+        font-family: "Arial Narrow", Arial, sans-serif !important;
+        transform: scaleX(0.85);
+        color: #000000 !important;
+    }
+
+    /* Styling for the active (current) lyric */
+    body.pop-2-album .current-lyric {
+        font-family: "Arial Narrow", Arial, sans-serif !important;
+        transform: scaleX(0.85);
+        color: #000000 !important;
+        font-weight: normal !important;
+    }

@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>nullyrics</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Color Thief library for color extraction from album art -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js" integrity="sha512-tK1VOkYJ81...==" crossorigin="anonymous"></script>
+
+    <!-- Default / Fallback CSS (can be moved to styles/default.css) -->
+    <style>
+            /* -----------------------------
+           GLOBAL / DEFAULT STYLES
+        ----------------------------- */
+            html, body {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                background: #000; /* Fallback background (overridden by custom CSS or gradient) */
+                color: #fff;
+                font-family: sans-serif;
+                text-align: center;
+            }
+            /* Lyrics Container */
+            #lyrics-container {
+                width: 100vw;
+                height: 100vh;
+                overflow-y: scroll;
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+
+                #lyrics-container::-webkit-scrollbar {
+                    display: none;
+                }
+            /* Inner container for lyrics; zoom is applied here */
+            #lyrics-inner {
+                padding: 40px 0;
+                font-size: 100%;
+            }
+            /* Lyric lines */
+            .lyric-line {
+                margin: 24px 0; /* Default spacing (will be capped on zoom out) */
+                font-size: 1.8em;
+                transition: font-size 0.3s, margin 0.3s, opacity 0.3s;
+            }
+            /* Past/Future lyric appearance */
+            .past-lyric,
+            .future-lyric {
+                font-size: 1.5em;
+                opacity: 0.6;
+            }
+            /* Current lyric */
+            .current-lyric {
+                font-size: 3.5em;
+                opacity: 1;
+                font-weight: bold;
+            }
+            /* Debug Panel – default closed */
+            #debug {
+                display: none;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                background: rgba(0, 0, 0, 0.8);
+                color: #fff;
+                font-family: monospace;
+                font-size: 12px;
+                width: 100%;
+                max-height: 200px;
+                overflow-y: auto;
+                padding: 5px;
+                box-sizing: border-box;
+                z-index: 9999;
+            }
+            /* Login Button */
+            #login {
+                position: absolute;
+                top: 10%;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 1.2em;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                background: #1DB954;
+                color: #fff;
+                z-index: 10000;
+            }
+            /* Zoom & Style Menu (mini drop-down in bottom-right) */
+            #menu {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: rgba(0, 0, 0, 0.3);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                border-radius: 8px;
+                padding: 5px 10px;
+                z-index: 10000;
+                transition: all 0.3s ease;
+                color: #fff;
+                font-family: sans-serif;
+            }
+            /* Gear icon for toggling the menu */
+            #menu-toggle {
+                cursor: pointer;
+                font-size: 1.2rem;
+                padding: 4px 6px;
+                user-select: none;
+            }
+            /* Menu items container (hidden by default) */
+            #menu-items {
+                display: none;
+                margin-top: 4px;
+                text-align: left;
+            }
+
+            #menu.open #menu-items {
+                display: block;
+            }
+            /* Buttons inside the drop-down */
+            #menu-items button {
+                display: block;
+                width: 100%;
+                background: transparent;
+                color: #fff;
+                border: none;
+                text-align: left;
+                padding: 6px 8px;
+                margin: 2px 0;
+                font-size: 0.9rem;
+                cursor: pointer;
+                border-radius: 4px;
+                transition: background 0.2s, transform 0.1s;
+            }
+
+                #menu-items button:hover {
+                    background: rgba(255, 255, 255, 0.2);
+                }
+
+                #menu-items button:active {
+                    transform: scale(0.98);
+                }
+    </style>
+</head>
+<body>
+    <!-- Lyrics Container -->
+    <div id="lyrics-container">
+        <div id="lyrics-inner">
+            <!-- Lyric lines get injected dynamically -->
+        </div>
+    </div>
+
+    <!-- Mini Drop-down Menu (Zoom, Recenter) -->
+    <div id="menu">
+        <div id="menu-toggle" title="Settings">&#9881;</div>
+        <div id="menu-items">
+            <button id="zoom-in">zoom in</button>
+            <button id="zoom-out">zoom out</button>
+            <button id="recenter">recenter</button>
+        </div>
+    </div>
+
+    <!-- Debug Panel -->
+    <div id="debug"></div>
+    <!-- Login Button -->
+    <button id="login" style="display:none;">Login with Spotify</button>
+
+    <script>
+        /* ===============================
+           Debug Utility (toggle with "D")
+        =============================== */
+        function debugLog(msg) {
+            const debugDiv = document.getElementById("debug");
+            const atBottom = debugDiv.scrollTop + debugDiv.clientHeight >= debugDiv.scrollHeight - 5;
+            const timeStamp = new Date().toLocaleTimeString();
+            const newMsg = document.createElement("div");
+            newMsg.textContent = "[" + timeStamp + "] " + msg;
+            debugDiv.appendChild(newMsg);
+            if (atBottom) { debugDiv.scrollTop = debugDiv.scrollHeight; }
+            console.log(msg);
+        }
+        document.addEventListener("keydown", (e) => {
+            if (e.key.toLowerCase() === "d") {
+                const debugDiv = document.getElementById("debug");
+                debugDiv.style.display = debugDiv.style.display === "none" ? "block" : "none";
+            }
+        });
+
+        /* ===============================
+           Spotify OAuth (PKCE)
+        =============================== */
+        const CLIENT_ID = "07a6b2d0d9374aac9ab9528fc0f05fd3"; // Replace with your Spotify client ID
+        const REDIRECT_URI = window.location.origin + window.location.pathname;
+        const SCOPES = "user-read-currently-playing user-read-playback-state";
+        const musixmatchApiKey = ""; // Insert your Musixmatch API key if desired
+
+        function generateRandomString(length) {
+            const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+            let text = "";
+            const array = new Uint8Array(length);
+            window.crypto.getRandomValues(array);
+            for (let i = 0; i < length; i++) {
+                text += possible.charAt(array[i] % possible.length);
+            }
+            return text;
+        }
+        function base64UrlEncode(buffer) {
+            return btoa(String.fromCharCode.apply(null, new Uint8Array(buffer)))
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=+$/, '');
+        }
+        async function generateCodeChallenge(codeVerifier) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(codeVerifier);
+            const digest = await window.crypto.subtle.digest("SHA-256", data);
+            return base64UrlEncode(digest);
+        }
+        function getQueryParam(param) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(param);
+        }
+        function storeToken(token, expiresIn) {
+            const expiresAt = Date.now() + expiresIn * 1000;
+            localStorage.setItem("spotify_access_token", token);
+            localStorage.setItem("spotify_token_expires_at", expiresAt);
+            debugLog("Token stored; expires at " + new Date(expiresAt).toLocaleTimeString());
+        }
+        function getStoredToken() {
+            const token = localStorage.getItem("spotify_access_token");
+            const expiresAt = localStorage.getItem("spotify_token_expires_at");
+            if (token && expiresAt && Date.now() < parseInt(expiresAt, 10)) {
+                debugLog("Using stored token from localStorage.");
+                return token;
+            }
+            return null;
+        }
+        async function initiateSpotifyAuth() {
+            const codeVerifier = generateRandomString(128);
+            localStorage.setItem("spotify_code_verifier", codeVerifier);
+            const codeChallenge = await generateCodeChallenge(codeVerifier);
+            const authUrl = "https://accounts.spotify.com/authorize" +
+                "?response_type=code" +
+                "&client_id=" + encodeURIComponent(CLIENT_ID) +
+                "&scope=" + encodeURIComponent(SCOPES) +
+                "&redirect_uri=" + encodeURIComponent(REDIRECT_URI) +
+                "&code_challenge_method=S256" +
+                "&code_challenge=" + encodeURIComponent(codeChallenge);
+            debugLog("Redirecting to Spotify auth...");
+            window.location = authUrl;
+        }
+        async function exchangeCodeForToken(code) {
+            const codeVerifier = localStorage.getItem("spotify_code_verifier");
+            debugLog("Exchanging code for token...");
+            const body = new URLSearchParams({
+                grant_type: "authorization_code",
+                code: code,
+                redirect_uri: REDIRECT_URI,
+                client_id: CLIENT_ID,
+                code_verifier: codeVerifier
+            });
+            try {
+                const response = await fetch("https://accounts.spotify.com/api/token", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: body.toString()
+                });
+                const data = await response.json();
+                if (data.access_token) {
+                    storeToken(data.access_token, data.expires_in);
+                    return data.access_token;
+                } else {
+                    debugLog("Error exchanging code: " + JSON.stringify(data));
+                    return null;
+                }
+            } catch (err) {
+                debugLog("Token exchange error: " + err);
+                return null;
+            }
+        }
+
+        /* ===============================
+           Custom Styles & Dynamic Gradient
+        =============================== */
+        // Sanitize strings for file/directory names (e.g., converting "AC/DC" to "ac-dc")
+        function sanitizeName(name) {
+            return name.toLowerCase()
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-+|-+$/g, "");
+        }
+        // Load custom CSS files from subfolders.
+        // For each type (artist, album, single), check for a subfolder named with
+        // the sanitized name and load its "style.css". Additionally, log the expected folder names.
+        function applyCustomStyles(trackName, albumName, artistName, albumCoverUrl) {
+            // Clear previous body classes and background
+            document.body.className = "";
+            document.body.style.backgroundImage = "none";
+            const head = document.getElementsByTagName("head")[0];
+            let customStyleLoaded = false;
+            let singleLoaded = false;
+            let albumLoaded = false;
+            let artistLoaded = false;
+
+            // Log the expected folder names for development help.
+            const expectedArtistFolder = sanitizeName(artistName);
+            const expectedAlbumFolder = sanitizeName(albumName);
+            const expectedSingleFolder = sanitizeName(trackName);
+
+            debugLog("Expected custom CSS folder for ARTIST: " + expectedArtistFolder);
+            debugLog("Expected custom CSS folder for ALBUM: " + expectedAlbumFolder);
+            debugLog("Expected custom CSS folder for SINGLE: " + expectedSingleFolder);
+
+            function loadStyle(href, id, callback) {
+                const link = document.createElement("link");
+                link.rel = "stylesheet";
+                link.href = href;
+                link.id = id;
+                link.onload = () => {
+                    customStyleLoaded = true;
+                    if (typeof callback === "function") callback();
+                };
+                link.onerror = () => {
+                    if (link.parentNode) link.parentNode.removeChild(link);
+                };
+                head.appendChild(link);
+            }
+
+            // Look in the subfolders for each type
+            loadStyle("styles/artist/" + expectedArtistFolder + "/style.css", "artist-style", () => {
+                artistLoaded = true;
+                debugLog("Loaded custom CSS for ARTIST from folder: " + expectedArtistFolder);
+            });
+            loadStyle("styles/album/" + expectedAlbumFolder + "/style.css", "album-style", () => {
+                albumLoaded = true;
+                debugLog("Loaded custom CSS for ALBUM from folder: " + expectedAlbumFolder);
+            });
+            loadStyle("styles/single/" + expectedSingleFolder + "/style.css", "single-style", () => {
+                singleLoaded = true;
+                debugLog("Loaded custom CSS for SINGLE from folder: " + expectedSingleFolder);
+            });
+
+            // After a short delay, if no custom CSS is loaded, apply the album cover gradient.
+            setTimeout(() => {
+                if (!customStyleLoaded && albumCoverUrl) {
+                    applyAlbumCoverGradient(albumCoverUrl);
+                } else {
+                    // Optionally assign a body class based on available custom CSS: single > album > artist.
+                    if (singleLoaded) {
+                        document.body.classList.add(expectedSingleFolder + "-single");
+                    } else if (albumLoaded) {
+                        document.body.classList.add(expectedAlbumFolder + "-album");
+                    } else if (artistLoaded) {
+                        document.body.classList.add(expectedArtistFolder + "-artist");
+                    }
+                }
+            }, 600);
+        }
+        // Apply a dynamic background gradient from the album cover using Color Thief.
+        function applyAlbumCoverGradient(imageUrl) {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = function () {
+                try {
+                    const colorThief = new ColorThief();
+                    const dominant = colorThief.getColor(img);
+                    const palette = colorThief.getPalette(img, 2);
+                    const second = (palette && palette[1]) ? palette[1] : dominant;
+                    const rgbA = `rgb(${dominant[0]}, ${dominant[1]}, ${dominant[2]})`;
+                    const rgbB = `rgb(${second[0]}, ${second[1]}, ${second[2]})`;
+                    const gradientCSS = `linear-gradient(135deg, ${rgbA}, ${rgbB})`;
+                    document.body.style.backgroundImage = gradientCSS;
+                } catch (e) {
+                    debugLog("Gradient generation failed: " + e);
+                }
+            };
+            img.src = imageUrl;
+        }
+
+        /* ===============================
+           Lyric Sync & Display Logic
+        =============================== */
+        let spotifyToken = null;
+        let currentTrackId = null;
+        let currentSongPosition = 0;
+        let trackPaused = false;
+        let lyrics = [];
+        let lyricElements = [];
+        let currentLyricIndex = 0;
+        let lastSpotifyProgress = 0;
+        let lastSpotifyTimestamp = performance.now();
+        const POLL_INTERVAL = 1000;
+        let animationFrameRequest;
+        const lyricsContainer = document.getElementById("lyrics-container");
+        const lyricsInner = document.getElementById("lyrics-inner");
+
+        // Zoom level (persisted via localStorage)
+        let zoomLevel = parseFloat(localStorage.getItem("zoomLevel")) || 1.0;
+        lyricsInner.style.fontSize = (zoomLevel * 100) + "%";
+
+        // Update margins of lyric elements.
+        // When zoomed out (zoomLevel < 1), cap margins to the default (24px).
+        function updateLyricMargins() {
+            const effectiveZoom = zoomLevel < 1 ? 1 : zoomLevel;
+            const newMargin = 24 * effectiveZoom;
+            lyricElements.forEach(el => {
+                el.style.marginTop = newMargin + "px";
+                el.style.marginBottom = newMargin + "px";
+            });
+        }
+
+        // Update display (active lyric highlight and auto-centering)
+        function updateLyricDisplay(songPosMs) {
+            if (!lyrics.length) return;
+            let idx = 0;
+            for (let i = 0; i < lyrics.length; i++) {
+                if (lyrics[i].time <= songPosMs) {
+                    idx = i;
+                } else {
+                    break;
+                }
+            }
+            currentLyricIndex = idx;
+            lyricElements.forEach((elem, i) => {
+                elem.classList.remove("past-lyric", "current-lyric", "future-lyric");
+                if (i < currentLyricIndex) {
+                    elem.classList.add("past-lyric");
+                } else if (i === currentLyricIndex) {
+                    elem.classList.add("current-lyric");
+                } else {
+                    elem.classList.add("future-lyric");
+                }
+            });
+            // Auto-center the current lyric.
+            const currentElem = lyricElements[currentLyricIndex];
+            if (currentElem && autoCenterEnabled) {
+                const containerHeight = lyricsContainer.clientHeight;
+                const computedStyle = window.getComputedStyle(currentElem);
+                const marginTop = parseFloat(computedStyle.marginTop) || 0;
+                const marginBottom = parseFloat(computedStyle.marginBottom) || 0;
+                const effectiveHeight = currentElem.clientHeight + marginTop + marginBottom;
+                const offset = (currentElem.offsetTop + effectiveHeight / 2) - (containerHeight / 2);
+                if (currentLyricIndex !== lastCenteredLyricIndex) {
+                    lastCenteredLyricIndex = currentLyricIndex;
+                    lyricsContainer.scrollTo({ top: offset, behavior: "smooth" });
+                }
+            }
+        }
+        function animationLoop(timestamp) {
+            if (!trackPaused) {
+                const elapsed = timestamp - lastSpotifyTimestamp;
+                currentSongPosition = lastSpotifyProgress + elapsed;
+            }
+            updateLyricDisplay(currentSongPosition);
+            animationFrameRequest = requestAnimationFrame(animationLoop);
+        }
+
+        /* ===============================
+           Spotify Polling & Lyrics Fetching
+        =============================== */
+        async function fetchCurrentTrack() {
+            debugLog("Fetching current track from Spotify...");
+            try {
+                const resp = await fetch("https://api.spotify.com/v1/me/player/currently-playing", {
+                    headers: { "Authorization": "Bearer " + spotifyToken }
+                });
+                if (resp.status === 204) {
+                    debugLog("No track currently playing (204).");
+                    return null;
+                }
+                const data = await resp.json();
+                debugLog("Fetched track: " + (data.item ? data.item.name : "none"));
+                return data;
+            } catch (err) {
+                debugLog("Spotify API error: " + err);
+                return null;
+            }
+        }
+        async function pollSpotify() {
+            debugLog("Polling Spotify...");
+            const data = await fetchCurrentTrack();
+            if (data && data.item) {
+                const trackId = data.item.id;
+                const trackName = data.item.name;
+                const artistName = data.item.artists[0]?.name || "";
+                const albumName = data.item.album?.name || "";
+                const albumCoverUrl = data.item.album?.images?.[0]?.url || "";
+                const durationMs = data.item.duration_ms;
+                const progressMs = data.progress_ms || 0;
+                trackPaused = !data.is_playing;
+
+                // Only update custom styles when a new track is detected.
+                if (trackId !== currentTrackId) {
+                    debugLog("New track detected: " + trackName);
+                    currentTrackId = trackId;
+
+                    // Log expected folder names for custom CSS.
+                    const expectedArtistFolder = sanitizeName(artistName);
+                    const expectedAlbumFolder = sanitizeName(albumName);
+                    const expectedSingleFolder = sanitizeName(trackName);
+                    debugLog("Expected custom CSS folder for ARTIST: " + expectedArtistFolder);
+                    debugLog("Expected custom CSS folder for ALBUM: " + expectedAlbumFolder);
+                    debugLog("Expected custom CSS folder for SINGLE: " + expectedSingleFolder);
+
+                    // Apply custom styles (from subfolders) or fallback to gradient.
+                    applyCustomStyles(trackName, albumName, artistName, albumCoverUrl);
+
+                    currentLyricIndex = 0;
+                    lyrics = [];
+                    lyricElements = [];
+                    lyricsInner.innerHTML = "";
+                    const lyricData = await fetchLyrics(trackName, artistName, albumName, durationMs);
+                    if (!lyricData) {
+                        lyricsInner.innerHTML = `<div class="errorMsg">Lyrics not found for "${trackName}"</div>`;
+                    } else if (!lyricData.isSynced) {
+                        lyricsInner.innerHTML = `<div class="errorMsg">No synced lyrics available for "${trackName}"</div>`;
+                    } else {
+                        lyrics = parseSyncedLyrics(lyricData.lyrics);
+                        buildLyricElements(lyrics);
+                        updateLyricMargins();
+                    }
+                    lastSpotifyProgress = 0;
+                    lastSpotifyTimestamp = performance.now();
+                    currentSongPosition = 0;
+                    autoCenterEnabled = true;
+                    lastCenteredLyricIndex = -1;
+                } else {
+                    lastSpotifyProgress = progressMs;
+                    lastSpotifyTimestamp = performance.now();
+                }
+            } else {
+                debugLog("No track data or not playing.");
+            }
+            setTimeout(pollSpotify, POLL_INTERVAL);
+        }
+        async function fetchLyrics(track, artist, album, durationMs) {
+            debugLog(`Fetching lyrics for "${track}" by "${artist}"...`);
+            const durationSec = Math.floor(durationMs / 1000);
+            const lyricsApiBase = "https://lrclib.net/api/get";
+            const url = `${lyricsApiBase}?track_name=${encodeURIComponent(track)}&artist_name=${encodeURIComponent(artist)}&album_name=${encodeURIComponent(album)}&duration=${durationSec}`;
+            debugLog("Request URL: " + url);
+            try {
+                const resp = await fetch(url);
+                const data = await resp.json();
+                if (data && data.syncedLyrics) {
+                    debugLog("Synced lyrics found from LRCLIB.");
+                    return { lyrics: data.syncedLyrics, isSynced: true };
+                } else if (data && data.plainLyrics) {
+                    debugLog("Plain lyrics found (not synced) from LRCLIB.");
+                    return { lyrics: data.plainLyrics, isSynced: false };
+                }
+            } catch (err) {
+                debugLog("LRCLIB fetch failed: " + err);
+            }
+            if (musixmatchApiKey) {
+                try {
+                    const mmUrl = `https://api.musixmatch.com/ws/1.1/matcher.subtitle.get?format=json&q_track=${encodeURIComponent(track)}&q_artist=${encodeURIComponent(artist)}&${musixmatchApiKey}&f_subtitle_length=${durationSec}`;
+                    debugLog("Attempting Musixmatch fallback: " + mmUrl);
+                    const resp = await fetch(mmUrl);
+                    const data = await resp.json();
+                    const body = data.message?.body;
+                    if (body && body.subtitle && body.subtitle.subtitle_body) {
+                        debugLog("Synced lyrics found from Musixmatch.");
+                        return { lyrics: body.subtitle.subtitle_body, isSynced: true };
+                    }
+                } catch (err) {
+                    debugLog("Musixmatch API error: " + err);
+                }
+            }
+            debugLog("No lyrics found.");
+            return null;
+        }
+        function timeStrToMs(timeStr) {
+            const parts = timeStr.split(':');
+            let min = 0, sec = 0, ms = 0;
+            if (parts.length === 3) {
+                min = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+                [sec, ms] = parts[2].split('.');
+            } else if (parts.length === 2) {
+                min = parseInt(parts[0]);
+                [sec, ms] = parts[1].split('.');
+            } else {
+                [sec, ms] = timeStr.split('.');
+            }
+            sec = parseInt(sec);
+            ms = parseInt(ms) || 0;
+            return (min * 60 + sec) * 1000 + (ms < 10 ? ms * 100 : (ms < 100 ? ms * 10 : ms));
+        }
+        function parseSyncedLyrics(lrcText) {
+            debugLog("Parsing synced lyrics...");
+            const events = [];
+            const lines = lrcText.split(/\r?\n/);
+            for (let line of lines) {
+                line = line.trim();
+                if (!line) continue;
+                const timeTags = line.match(/\[([\d:.\-]+)\]/g);
+                let lyricContent = line;
+                if (timeTags) {
+                    lyricContent = line.replace(/\[([\d:.\-]+)\]/g, '').trim();
+                    for (let tag of timeTags) {
+                        const ms = timeStrToMs(tag.replace(/\[|\]/g, ''));
+                        if (lyricContent !== "") {
+                            events.push({ time: ms, text: lyricContent });
+                        }
+                    }
+                }
+            }
+            events.sort((a, b) => a.time - b.time);
+            debugLog("Parsed " + events.length + " lyric events.");
+            return events;
+        }
+        function buildLyricElements(lyricsArray) {
+            lyricsInner.innerHTML = "";
+            lyricElements = [];
+            lyricsArray.forEach((lyric) => {
+                const p = document.createElement("p");
+                p.classList.add("lyric-line");
+                p.textContent = lyric.text;
+                lyricsInner.appendChild(p);
+                lyricElements.push(p);
+            });
+        }
+
+        /* ===============================
+           Auto-Centering Toggle
+        =============================== */
+        let autoCenterEnabled = true;
+        let lastCenteredLyricIndex = -1;
+        lyricsContainer.addEventListener("wheel", () => {
+            if (autoCenterEnabled) {
+                autoCenterEnabled = false;
+                debugLog("User scrolled manually; auto-centering disabled.");
+            }
+        });
+        lyricsContainer.addEventListener("touchmove", () => {
+            if (autoCenterEnabled) {
+                autoCenterEnabled = false;
+                debugLog("User touched/scrolled; auto-centering disabled.");
+            }
+        });
+
+        /* ===============================
+           Zoom & Recenter Controls
+        =============================== */
+        const menu = document.getElementById("menu");
+        const menuToggle = document.getElementById("menu-toggle");
+        menuToggle.addEventListener("click", () => {
+            menu.classList.toggle("open");
+        });
+        document.getElementById("zoom-in").addEventListener("click", () => {
+            zoomLevel = Math.min(zoomLevel + 0.1, 3.0);
+            lyricsInner.style.fontSize = (zoomLevel * 100) + "%";
+            localStorage.setItem("zoomLevel", zoomLevel.toFixed(2));
+            updateLyricMargins();
+        });
+        document.getElementById("zoom-out").addEventListener("click", () => {
+            // Allow zooming out beyond default, but cap spacing to default.
+            zoomLevel = zoomLevel - 0.1;
+            lyricsInner.style.fontSize = (zoomLevel * 100) + "%";
+            localStorage.setItem("zoomLevel", zoomLevel.toFixed(2));
+            updateLyricMargins();
+        });
+        document.getElementById("recenter").addEventListener("click", () => {
+            const currentLine = document.querySelector(".current-lyric");
+            if (currentLine) {
+                currentLine.scrollIntoView({ behavior: "smooth", block: "center" });
+                debugLog("Recentered to current lyric.");
+            }
+        });
+
+        /* ===============================
+           Initialization & Spotify Polling
+        =============================== */
+        async function init() {
+            spotifyToken = getStoredToken();
+            if (spotifyToken) {
+                debugLog("Found stored token, starting app.");
+                pollSpotify();
+                animationFrameRequest = requestAnimationFrame(animationLoop);
+            } else {
+                const code = getQueryParam("code");
+                if (code) {
+                    spotifyToken = await exchangeCodeForToken(code);
+                    window.history.replaceState({}, document.title, REDIRECT_URI);
+                    if (spotifyToken) {
+                        pollSpotify();
+                        animationFrameRequest = requestAnimationFrame(animationLoop);
+                    } else {
+                        debugLog("Failed to obtain token.");
+                    }
+                } else {
+                    document.getElementById("login").style.display = "block";
+                    document.getElementById("login").onclick = initiateSpotifyAuth;
+                    debugLog("No token found. Waiting for user login...");
+                }
+            }
+        }
+        init();
+    </script>
+</body>
+</html>

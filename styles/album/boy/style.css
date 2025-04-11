@@ -1,0 +1,41 @@
+@font-face {
+    font-family: "Futura";
+    src: url("Futura.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Set the entire background and base text for the album "boy" */
+body[class="boy-album"] {
+    background: linear-gradient(135deg, #696e74, #a6abb1) !important;
+    color: #ffffff !important;
+    font-family: "Futura", sans-serif !important;
+}
+
+/* Base styling for all lyric lines */
+body[class="boy-album"] .lyric-line {
+    font-family: "Futura", sans-serif !important;
+    text-transform: lowercase;
+    letter-spacing: 0.05em;
+    color: #ffffff !important;
+    margin: 20px 0;
+    /* Slight horizontal stretch */
+    transform: scaleX(1.05);
+    /* Subtle drop shadow for a soft, blurred effect */
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.5) !important;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Styling for non-active (past and future) lyric lines */
+body[class="boy-album"] .past-lyric,
+body[class="boy-album"] .future-lyric {
+    opacity: 0.6;
+}
+
+/* Styling for the active (current) lyric */
+body[class="boy-album"] .current-lyric {
+    opacity: 1;
+    font-weight: bold;
+    transform: scaleX(1.05);
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.7) !important;
+}

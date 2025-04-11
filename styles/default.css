@@ -1,0 +1,116 @@
+﻿/* Default Styles for Spotify Lyrics Wallpaper */
+/* (This CSS is always loaded; custom styles override these when provided) */
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    background: #000; /* fallback background (will be overridden by gradient or custom CSS) */
+    color: #FFFFFF;
+    font-family: sans-serif;
+    overflow: hidden; /* prevent scrollbars if we handle scrolling in #lyrics */
+}
+
+/* Lyrics container */
+#lyrics {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    overflow-y: auto;
+    text-align: center;
+    padding: 2rem 1rem;
+    /* Base font size for lyrics; can be scaled by zoom (via inline style) */
+    font-size: 2rem;
+    line-height: 1.4;
+}
+
+    /* Each lyric line (assuming each line is a paragraph or div inside #lyrics) */
+    #lyrics p, #lyrics .lyric-line {
+        margin: 0.5em 0;
+        font-size: 1em; /* relative to #lyrics container for zoom scaling */
+        line-height: 1.4em; /* proportional line spacing */
+    }
+
+    /* (Optional) Highlight for current lyric line */
+    #lyrics .current-line {
+        color: #ffff99;
+        font-weight: bold;
+    }
+
+/* Zoom & Style menu container */
+#menu.style-menu {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    /* Rounded frosted-glass panel */
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px); /* frosted glass effect&#8203;:contentReference[oaicite:10]{index=10} */
+    -webkit-backdrop-filter: blur(10px); /* Safari support */
+    border-radius: 8px;
+    padding: 5px 10px;
+    color: #fff;
+    font-family: sans-serif;
+    /* Smooth transition for showing/hiding */
+    transition: all 0.3s ease;
+}
+
+/* Toggle button (gear icon) */
+#menu-toggle {
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 4px 6px;
+    user-select: none;
+}
+
+/* Menu items (hidden by default, shown when .open) */
+#menu-items {
+    display: none;
+    margin-top: 4px;
+    text-align: left;
+}
+
+#menu.open #menu-items {
+    display: block;
+}
+
+/* Style for the buttons inside the menu */
+#menu-items button {
+    display: block;
+    width: 100%;
+    background: transparent;
+    color: #fff;
+    border: none;
+    text-align: left;
+    padding: 6px 8px;
+    margin: 2px 0;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+    #menu-items button:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    #menu-items button:active {
+        transform: scale(0.98);
+    }
+
+/* Recenter button specific (if any distinct styling wanted) */
+#recenter:before {
+    content: "⟲  "; /* add a unicode symbol for recenter if desired (optional) */
+}
+
+/* Responsive tweaks (if needed) */
+@media (max-width: 600px) {
+    #menu.style-menu {
+        padding: 4px 8px;
+        font-size: 0.9rem;
+    }
+
+    #menu-items button {
+        font-size: 0.9rem;
+    }
+}

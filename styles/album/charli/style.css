@@ -1,0 +1,41 @@
+@font-face {
+    font-family: "Arial Narrow";
+    src: url("ArialNarrow.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Set the entire background and base text for the album */
+body.charli-album {
+    background-color: #8e8983 !important;
+    color: #0c0b08 !important;
+}
+
+    /* Base styling for all lyric lines */
+    body.charli-album .lyric-line {
+        font-family: "Arial Narrow", Arial, sans-serif !important;
+        /* Slight horizontal scaling to make text a bit narrower */
+        transform: scaleX(0.85);
+        /* Subtle light gray text shadow for a blurry effect */
+        filter: blur(1px);
+        color: #0c0b08 !important;
+    }
+
+    /* Styling for non-active (past and future) lyrics */
+    body.charli-album .past-lyric,
+    body.charli-album .future-lyric {
+        font-family: "Arial Narrow", Arial, sans-serif !important;
+        transform: scaleX(0.85);
+        filter: blur(1px);
+        color: #0c0b08 !important;
+    }
+
+    /* Styling for the active (current) lyric */
+    body.charli-album .current-lyric {
+        font-family: "Arial Narrow", Arial, sans-serif !important;
+        transform: scaleX(0.85);
+        filter: blur(1px);
+        color: #0c0b08 !important;
+        font-weight: normal;
+    }
+

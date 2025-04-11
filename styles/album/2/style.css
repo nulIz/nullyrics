@@ -1,0 +1,41 @@
+@font-face {
+    font-family: "Custom Helvetica";
+    src: url("Helvetica.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Set the entire background and base text for Album 2 */
+body[class="2-album"] {
+    background-color: #ffffff !important;
+    color: #cd0d0e !important;
+}
+
+    /* Base styling for all lyric lines */
+    body[class="2-album"] .lyric-line {
+        font-family: "Custom Helvetica", Helvetica, Arial, sans-serif !important;
+        transform: scaleX(1.1);
+        text-shadow: 0 0 1px lightgray !important;
+        font-weight: normal !important;
+        color: #cd0d0e !important;
+        text-transform: uppercase;
+    }
+
+    /* Styling for non-active (past and future) lyrics */
+    body[class="2-album"] .past-lyric,
+    body[class="2-album"] .future-lyric {
+        font-family: "Custom Helvetica", Helvetica, Arial, sans-serif !important;
+        transform: scaleX(1.1);
+        text-shadow: 0 0 1px lightgray !important;
+        color: #cd0d0e !important;
+        text-transform: uppercase;
+    }
+
+    /* Styling for the active (current) lyric */
+    body[class="2-album"] .current-lyric {
+        font-family: "Custom Helvetica", Helvetica, Arial, sans-serif !important;
+        transform: scaleX(1.1);
+        text-shadow: 0 0 1px lightgray !important;
+        color: #cd0d0e !important;
+        text-transform: uppercase;
+    }

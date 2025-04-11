@@ -1,0 +1,40 @@
+@font-face {
+    font-family: "Arial Narrow";
+    src: url("ArialNarrow.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Set the entire background and base text for the album */
+body.brat-album {
+    background-color: #8ACE00 !important;
+    color: #000000 !important;
+}
+
+    /* Base styling for all lyric lines */
+    body.brat-album .lyric-line {
+        font-family: "Arial Narrow", Arial, sans-serif !important;
+        /* Slight horizontal scaling to make text a bit narrower */
+        transform: scaleX(0.85);
+        /* Subtle light gray text shadow for a blurry effect */
+        filter: blur(1px);
+        color: #000000 !important;
+    }
+
+    /* Styling for non-active (past and future) lyrics */
+    body.brat-album .past-lyric,
+    body.brat-album .future-lyric {
+        font-family: "Arial Narrow", Arial, sans-serif !important;
+        transform: scaleX(0.85);
+        filter: blur(1px);
+        color: #000000 !important;
+    }
+
+    /* Styling for the active (current) lyric */
+    body.brat-album .current-lyric {
+        font-family: "Arial Narrow", Arial, sans-serif !important;
+        transform: scaleX(0.85);
+        filter: blur(1px);
+        color: #000000 !important;
+        font-weight: normal;
+    }

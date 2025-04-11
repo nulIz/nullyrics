@@ -1,0 +1,41 @@
+@font-face {
+    font-family: "Arial Narrow";
+    src: url("ArialNarrow.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Set the entire background and base text for the album */
+body.how-i-m-feeling-now-album {
+    background-color: #ffffff !important;
+    color: #d3d3d3 !important;
+}
+
+    /* Base styling for all lyric lines */
+    body.how-i-m-feeling-now-album .lyric-line {
+        font-family: "Arial Narrow", Arial, sans-serif !important;
+        /* Slight horizontal scaling to make text a bit narrower */
+        transform: scaleX(0.9);
+        /* Subtle light gray text shadow for a blurry effect */
+        filter: blur(1px);
+        color: #d3d3d3 !important;
+    }
+
+    /* Styling for non-active (past and future) lyrics */
+    body.how-i-m-feeling-now-album .past-lyric,
+    body.how-i-m-feeling-now-album .future-lyric {
+        font-family: "Arial Narrow", Arial, sans-serif !important;
+        transform: scaleX(0.9);
+        filter: blur(1px);
+        color: #d3d3d3 !important;
+    }
+
+    /* Styling for the active (current) lyric */
+    body.how-i-m-feeling-now-album .current-lyric {
+        font-family: "Arial Narrow", Arial, sans-serif !important;
+        transform: scaleX(0.9);
+        filter: blur(1px);
+        color: #d3d3d3 !important;
+        font-weight: normal;
+    }
+
